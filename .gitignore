@@ -1,0 +1,15 @@
+# Output scraping (tidak perlu masuk repo)
+*.xlsx
+*.json
+~$*.xlsx
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Script lama
+scrape_flightradar24.py
+flightradar24_CGK_DPS_*.xlsx
+flightradar24_CGK_DPS_*.json

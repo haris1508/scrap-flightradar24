@@ -1,0 +1,51 @@
+name: FlightRadar24 Scraper
+
+on:
+  # ── Trigger manual dari GitHub UI ──────────────────────────────────────
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Data yang diambil'
+        required: true
+        default: 'yesterday'
+        type: choice
+        options:
+          - yesterday   # H-1 (Senin) ← default untuk run Selasa
+          - today       # Hari ini
+
+  # ── Otomatis setiap Selasa jam 08.00 WIB (01.00 UTC) ───────────────────
+  # Aktifkan jika mau dijadwalkan otomatis (hapus tanda # di bawah):
+  # schedule:
+  #   - cron: '0 1 * * 2'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: Run scraper
+        run: python scrape_board.py ${{ github.event.inputs.mode || 'yesterday' }}
+
+      - name: Upload hasil sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flightradar24-${{ github.run_id }}
+          path: |
+            *.xlsx
+            *.json
+          retention-days: 30
