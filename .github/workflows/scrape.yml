@@ -38,8 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          playwright install chromium
-          sudo $(which playwright) install-deps chromium
+          playwright install --with-deps chromium
 
       - name: Run scraper (retry 3x jika gagal)
         run: |
