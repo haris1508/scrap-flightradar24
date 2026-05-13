@@ -37,8 +37,14 @@ jobs:
           playwright install chromium
           playwright install-deps chromium
 
-      - name: Run scraper
-        run: python scrape_board.py ${{ github.event.inputs.mode || 'yesterday' }}
+      - name: Run scraper (retry 2x jika gagal)
+        id: scraper
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 20
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: python scrape_board.py ${{ github.event.inputs.mode || 'yesterday' }}
 
       - name: Commit & push hasil ke repo
         run: |
@@ -47,3 +53,36 @@ jobs:
           git add *.xlsx *.json
           git diff --cached --quiet || git commit -m "data: $(ls *.xlsx | head -1 | sed 's/.xlsx//')"
           git push
+
+      # ── Notifikasi otomatis via GitHub Issue jika gagal ─────────────────
+      - name: Buat issue jika gagal
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toLocaleDateString('id-ID', {
+              timeZone: 'Asia/Jakarta',
+              day: '2-digit', month: 'long', year: 'numeric'
+            });
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `❌ Scraper gagal — ${date}`,
+              body: [
+                '## Scraper FlightRadar24 Gagal',
+                '',
+                `**Tanggal:** ${date}`,
+                `**Run:** [Lihat log di sini](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+                '',
+                '### Kemungkinan penyebab:',
+                '- FlightRadar24 memblokir sementara (anti-bot)',
+                '- Timeout saat membuka halaman',
+                '- Perubahan struktur halaman FR24',
+                '',
+                '### Solusi:',
+                '1. Klik link run di atas untuk lihat detail error',
+                '2. Coba trigger manual: **Actions → Run workflow**',
+                '3. Kalau masih gagal, ping @haris1508',
+              ].join('\n'),
+              labels: ['bug', 'automated']
+            });
