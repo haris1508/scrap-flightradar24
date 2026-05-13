@@ -17,6 +17,10 @@ on:
   schedule:
     - cron: '0 1 * * *'
 
+permissions:
+  contents: write   # untuk commit & push hasil ke repo
+  issues: write     # untuk buat issue notifikasi jika gagal
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -35,16 +39,21 @@ jobs:
         run: |
           pip install -r requirements.txt
           playwright install chromium
-          playwright install-deps chromium
+          sudo playwright install-deps chromium
 
-      - name: Run scraper (retry 2x jika gagal)
-        id: scraper
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 20
-          max_attempts: 3
-          retry_wait_seconds: 30
-          command: python scrape_board.py ${{ github.event.inputs.mode || 'yesterday' }}
+      - name: Run scraper (retry 3x jika gagal)
+        run: |
+          for i in 1 2 3; do
+            echo "=== Attempt $i ==="
+            python scrape_board.py ${{ github.event.inputs.mode || 'yesterday' }} && break
+            if [ $i -lt 3 ]; then
+              echo "Gagal, coba lagi dalam 30 detik..."
+              sleep 30
+            else
+              echo "Gagal setelah 3x percobaan"
+              exit 1
+            fi
+          done
 
       - name: Commit & push hasil ke repo
         run: |
@@ -84,5 +93,4 @@ jobs:
                 '2. Coba trigger manual: **Actions → Run workflow**',
                 '3. Kalau masih gagal, ping @haris1508',
               ].join('\n'),
-              labels: ['bug', 'automated']
             });
