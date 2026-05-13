@@ -14,9 +14,8 @@ on:
           - today       # Hari ini
 
   # ── Otomatis setiap Selasa jam 08.00 WIB (01.00 UTC) ───────────────────
-  # Aktifkan jika mau dijadwalkan otomatis (hapus tanda # di bawah):
-  # schedule:
-  #   - cron: '0 1 * * 2'
+  schedule:
+    - cron: '0 1 * * 2'
 
 jobs:
   scrape:
