@@ -13,9 +13,9 @@ on:
           - yesterday   # H-1 (Senin) ← default untuk run Selasa
           - today       # Hari ini
 
-  # ── Otomatis setiap Selasa jam 08.00 WIB (01.00 UTC) ───────────────────
+  # ── Otomatis setiap hari jam 08.00 WIB (01.00 UTC), ambil data H-1 ─────
   schedule:
-    - cron: '0 1 * * 2'
+    - cron: '0 1 * * *'
 
 jobs:
   scrape:
