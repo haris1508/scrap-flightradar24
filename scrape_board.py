@@ -268,6 +268,81 @@ def save(all_rows: list):
     # Urutkan: bandara → tipe → tanggal → waktu_jadwal
     df = df.sort_values(["bandara", "tipe", "waktu_jadwal"], ignore_index=True)
 
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    HEADER_FILL  = PatternFill("solid", fgColor="1F4E79")   # biru gelap
+    HEADER_FONT  = Font(name="Calibri", bold=True, color="FFFFFF", size=10)
+    DATA_FONT    = Font(name="Calibri", size=10)
+    BORDER_SIDE  = Side(style="thin", color="D9D9D9")
+    THIN_BORDER  = Border(
+        left=BORDER_SIDE, right=BORDER_SIDE,
+        top=BORDER_SIDE,  bottom=BORDER_SIDE,
+    )
+    # Kolom yang dibungkus (teks panjang), sisanya satu baris
+    WRAP_COLS = {"asal_nama", "tujuan_nama", "nama_pesawat", "status", "scraped_at"}
+    # Lebar minimum per kolom (karakter)
+    MIN_WIDTH = {
+        "bandara": 8, "tipe": 12, "tanggal": 12,
+        "waktu_jadwal": 13, "waktu_aktual": 13,
+        "nomor_flight": 12, "callsign": 10,
+        "asal_iata": 10, "asal_nama": 26,
+        "tujuan_iata": 12, "tujuan_nama": 26,
+        "maskapai": 22, "maskapai_iata": 13,
+        "kode_pesawat": 13, "nama_pesawat": 22,
+        "registrasi": 12, "status": 18, "scraped_at": 20,
+    }
+
+    def style_sheet(ws, col_names):
+        """Terapkan styling header + data + auto-fit ke sebuah worksheet."""
+        # ── Header row ──────────────────────────────────────────────────────
+        for col_idx, col_name in enumerate(col_names, start=1):
+            cell = ws.cell(row=1, column=col_idx)
+            cell.font      = HEADER_FONT
+            cell.fill      = HEADER_FILL
+            cell.alignment = Alignment(
+                horizontal="center", vertical="center",
+                wrap_text=False,
+            )
+            cell.border = THIN_BORDER
+
+        # ── Data rows ───────────────────────────────────────────────────────
+        for row in ws.iter_rows(min_row=2, max_row=ws.max_row,
+                                 min_col=1, max_col=ws.max_column):
+            for cell in row:
+                col_name = col_names[cell.column - 1] if cell.column - 1 < len(col_names) else ""
+                is_wrap  = col_name in WRAP_COLS
+                cell.font      = DATA_FONT
+                cell.alignment = Alignment(
+                    horizontal  = "left",
+                    vertical    = "top",
+                    wrap_text   = is_wrap,
+                )
+                cell.border = THIN_BORDER
+
+        # ── Auto-fit lebar kolom ─────────────────────────────────────────────
+        for col_idx, col_name in enumerate(col_names, start=1):
+            col_letter = get_column_letter(col_idx)
+            # Ukur lebar maks isi kolom (data rows)
+            max_data = max(
+                (len(str(ws.cell(row=r, column=col_idx).value or ""))
+                 for r in range(2, ws.max_row + 1)),
+                default=0,
+            )
+            # Ambil yang lebih besar: header, isi data, atau minimum preset
+            header_len = len(col_name)
+            preset     = MIN_WIDTH.get(col_name, 10)
+            # Kolom wrap: batasi lebar agar tidak terlalu lebar
+            if col_name in WRAP_COLS:
+                width = max(header_len + 2, preset)
+            else:
+                width = max(max_data + 2, header_len + 2, preset)
+            ws.column_dimensions[col_letter].width = min(width, 50)
+
+        # ── Freeze header & atur tinggi baris header ────────────────────────
+        ws.freeze_panes = "A2"
+        ws.row_dimensions[1].height = 22
+
     with pd.ExcelWriter(xlsx, engine="openpyxl") as writer:
         df.to_excel(writer, sheet_name="Semua Data", index=False)
         for iata in AIRPORTS:
@@ -278,19 +353,9 @@ def save(all_rows: list):
                                  sheet_name=f"{iata} {BOARDS[board]}",
                                  index=False)
 
-        # Auto-fit lebar kolom semua sheet
+        col_names = list(df.columns)
         for sheet in writer.book.worksheets:
-            for col in sheet.columns:
-                max_len = 0
-                col_letter = col[0].column_letter
-                for cell in col:
-                    try:
-                        max_len = max(max_len, len(str(cell.value or "")))
-                    except Exception:
-                        pass
-                sheet.column_dimensions[col_letter].width = min(max_len + 2, 50)
-            # Freeze baris pertama (header)
-            sheet.freeze_panes = "A2"
+            style_sheet(sheet, col_names)
 
     with open(json_f, "w", encoding="utf-8") as f:
         json.dump(all_rows, f, ensure_ascii=False, indent=2)
