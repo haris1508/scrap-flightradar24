@@ -10,7 +10,7 @@ on:
         default: 'yesterday'
         type: choice
         options:
-          - yesterday   # H-1 (Senin) ← default untuk run Selasa
+          - yesterday   # H-1 ← default
           - today       # Hari ini
 
   # ── Otomatis setiap hari jam 08.00 WIB (01.00 UTC), ambil data H-1 ─────
@@ -40,11 +40,10 @@ jobs:
       - name: Run scraper
         run: python scrape_board.py ${{ github.event.inputs.mode || 'yesterday' }}
 
-      - name: Upload hasil sebagai artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flightradar24-${{ github.run_id }}
-          path: |
-            *.xlsx
-            *.json
-          retention-days: 30
+      - name: Commit & push hasil ke repo
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.xlsx *.json
+          git diff --cached --quiet || git commit -m "data: $(ls *.xlsx | head -1 | sed 's/.xlsx//')"
+          git push

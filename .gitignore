@@ -1,6 +1,4 @@
-# Output scraping (tidak perlu masuk repo)
-*.xlsx
-*.json
+# Temp file Excel (lock file saat dibuka)
 ~$*.xlsx
 
 # Python cache
