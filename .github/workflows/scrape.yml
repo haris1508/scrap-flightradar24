@@ -13,9 +13,9 @@ on:
           - yesterday   # H-1 ← default
           - today       # Hari ini
 
-  # ── Otomatis setiap hari jam 08.00 WIB (01.00 UTC), ambil data H-1 ─────
+  # ── Otomatis setiap hari jam 05.00 WIB (22.00 UTC malam sebelumnya), ambil data H-1 ─────
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 22 * * *'
 
 permissions:
   contents: write   # untuk commit & push hasil ke repo
