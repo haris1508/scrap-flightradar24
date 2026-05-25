@@ -100,25 +100,31 @@ def parse_schedule(data: dict, iata: str, board_type: str) -> list[dict]:
                 aktual = ts2hm(real_dep or est_dep)
                 tanggal = ts2date(sched_dep)
 
+            # Arrivals → tampilkan asal; Departures → tampilkan tujuan
+            origin_iata = (origin.get("code", {}) or {}).get("iata", "") or ""
+            origin_nama = origin.get("name", "") or ""
+            dest_iata   = (dest.get("code", {}) or {}).get("iata", "") or ""
+            dest_nama   = dest.get("name", "") or ""
+            at_iata = origin_iata if board_type == "arrivals" else dest_iata
+            at_nama = origin_nama if board_type == "arrivals" else dest_nama
+
             row = {
-                "bandara":       iata,
-                "tipe":          board_type,
-                "tanggal":       tanggal,
-                "waktu_jadwal":  jadwal,
-                "waktu_aktual":  aktual,
-                "nomor_flight":  (ident.get("number", {}) or {}).get("default", ""),
-                "callsign":      ident.get("callsign", "") or "",
-                "asal_iata":     ((origin.get("code", {}) or {}).get("iata", "")),
-                "asal_nama":     origin.get("name", "") or "",
-                "tujuan_iata":   ((dest.get("code", {}) or {}).get("iata", "")),
-                "tujuan_nama":   dest.get("name", "") or "",
-                "maskapai":      airline.get("name", "") or "",
-                "maskapai_iata": ((airline.get("code", {}) or {}).get("iata", "")),
-                "kode_pesawat":  ((ac.get("model", {}) or {}).get("code", "")),
-                "nama_pesawat":  ((ac.get("model", {}) or {}).get("text", "")),
-                "registrasi":    ac.get("registration", "") or "",
-                "status":        status.get("text", "") or "",
-                "scraped_at":    datetime.now(WIB).strftime("%Y-%m-%d %H:%M:%S"),
+                "bandara":          iata,
+                "tipe":             board_type,
+                "tanggal":          tanggal,
+                "waktu_jadwal":     jadwal,
+                "waktu_aktual":     aktual,
+                "nomor_flight":     (ident.get("number", {}) or {}).get("default", ""),
+                "callsign":         ident.get("callsign", "") or "",
+                "asal_tujuan_iata": at_iata,
+                "asal_tujuan_nama": at_nama,
+                "maskapai":         airline.get("name", "") or "",
+                "maskapai_iata":    ((airline.get("code", {}) or {}).get("iata", "")),
+                "kode_pesawat":     ((ac.get("model", {}) or {}).get("code", "")),
+                "nama_pesawat":     ((ac.get("model", {}) or {}).get("text", "")),
+                "registrasi":       ac.get("registration", "") or "",
+                "status":           status.get("text", "") or "",
+                "scraped_at":       datetime.now(WIB).strftime("%Y-%m-%d %H:%M:%S"),
             }
             rows.append(row)
         except Exception:
@@ -279,14 +285,13 @@ def save(all_rows: list):
         top=BORDER_SIDE,  bottom=BORDER_SIDE,
     )
     # Kolom yang dibungkus (teks panjang), sisanya satu baris
-    WRAP_COLS = {"asal_nama", "tujuan_nama", "nama_pesawat", "status", "scraped_at"}
+    WRAP_COLS = {"asal_tujuan_nama", "nama_pesawat", "status", "scraped_at"}
     # Lebar minimum per kolom (karakter)
     MIN_WIDTH = {
         "bandara": 8, "tipe": 12, "tanggal": 12,
         "waktu_jadwal": 13, "waktu_aktual": 13,
         "nomor_flight": 12, "callsign": 10,
-        "asal_iata": 10, "asal_nama": 26,
-        "tujuan_iata": 12, "tujuan_nama": 26,
+        "asal_tujuan_iata": 17, "asal_tujuan_nama": 30,
         "maskapai": 22, "maskapai_iata": 13,
         "kode_pesawat": 13, "nama_pesawat": 22,
         "registrasi": 12, "status": 18, "scraped_at": 20,
