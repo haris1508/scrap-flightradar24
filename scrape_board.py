@@ -268,6 +268,7 @@ def save(all_rows: list):
     # Format nama file: YYMMDD-Flightradar (tanggal data yang diambil)
     date_str = datetime.strptime(TARGET_DATE, "%Y-%m-%d").strftime("%y%m%d")
     xlsx     = f"{date_str}-Flightradar.xlsx"
+    csv_f    = f"{date_str}-Flightradar.csv"
 
     df = pd.DataFrame(all_rows)
     # Urutkan: bandara → tipe → tanggal → waktu_jadwal
@@ -354,7 +355,10 @@ def save(all_rows: list):
         for sheet in writer.book.worksheets:
             style_sheet(sheet, col_names)
 
+    df.to_csv(csv_f, index=False, encoding="utf-8-sig")
+
     print(f"\n  [OK] Excel : {xlsx}")
+    print(f"  [OK] CSV   : {csv_f}")
 
     # Ringkasan
     lbl2 = "Hari Ini" if MODE == "today" else "H-1"
