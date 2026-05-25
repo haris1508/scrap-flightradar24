@@ -349,13 +349,6 @@ def save(all_rows: list):
 
     with pd.ExcelWriter(xlsx, engine="openpyxl") as writer:
         df.to_excel(writer, sheet_name="Semua Data", index=False)
-        for iata in AIRPORTS:
-            for board in BOARDS:
-                sub = df[(df["bandara"] == iata) & (df["tipe"] == board)]
-                if not sub.empty:
-                    sub.to_excel(writer,
-                                 sheet_name=f"{iata} {BOARDS[board]}",
-                                 index=False)
 
         col_names = list(df.columns)
         for sheet in writer.book.worksheets:
