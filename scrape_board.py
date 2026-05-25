@@ -262,7 +262,6 @@ def save(all_rows: list):
     # Format nama file: YYMMDD-Flightradar (tanggal data yang diambil)
     date_str = datetime.strptime(TARGET_DATE, "%Y-%m-%d").strftime("%y%m%d")
     xlsx     = f"{date_str}-Flightradar.xlsx"
-    json_f   = f"{date_str}-Flightradar.json"
 
     df = pd.DataFrame(all_rows)
     # Urutkan: bandara → tipe → tanggal → waktu_jadwal
@@ -357,11 +356,7 @@ def save(all_rows: list):
         for sheet in writer.book.worksheets:
             style_sheet(sheet, col_names)
 
-    with open(json_f, "w", encoding="utf-8") as f:
-        json.dump(all_rows, f, ensure_ascii=False, indent=2)
-
     print(f"\n  [OK] Excel : {xlsx}")
-    print(f"  [OK] JSON  : {json_f}")
 
     # Ringkasan
     lbl2 = "Hari Ini" if MODE == "today" else "H-1"
