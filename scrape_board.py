@@ -33,13 +33,16 @@ BOARDS = {
 }
 
 import sys
-# Argumen: "today" atau "yesterday" (default: yesterday)
+# Argumen: "today", "yesterday", atau tanggal spesifik "YYYY-MM-DD" (default: yesterday)
 MODE = sys.argv[1] if len(sys.argv) > 1 else "yesterday"
-TARGET_DATE = (
-    datetime.now(WIB).strftime("%Y-%m-%d")
-    if MODE == "today"
-    else (datetime.now(WIB) - timedelta(days=1)).strftime("%Y-%m-%d")
-)
+if MODE == "today":
+    TARGET_DATE = datetime.now(WIB).strftime("%Y-%m-%d")
+elif MODE == "yesterday":
+    TARGET_DATE = (datetime.now(WIB) - timedelta(days=1)).strftime("%Y-%m-%d")
+else:
+    # Tanggal spesifik format YYYY-MM-DD
+    TARGET_DATE = MODE
+    MODE = "specific"
 YESTERDAY = TARGET_DATE  # alias agar kode di bawah tidak perlu diubah
 
 
