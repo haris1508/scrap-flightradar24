@@ -379,7 +379,7 @@ def save(all_rows: list):
     # Preview beberapa baris
     print(f"\n  Preview 5 baris pertama:")
     cols = ["tipe", "waktu_jadwal", "waktu_aktual", "nomor_flight",
-            "asal_nama", "tujuan_nama", "maskapai", "kode_pesawat", "status"]
+            "asal_tujuan_iata", "asal_tujuan_nama", "maskapai", "kode_pesawat", "status"]
     print(df[cols].head(5).to_string(index=False))
 
 
