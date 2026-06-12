@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard FlightRadar24 — Mei 2026</title>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --card2: #1a2235;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --accent3: #8b5cf6;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: rgba(255,255,255,0.07);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '✈';
+    position: absolute;
+    right: 60px; top: 20px;
+    font-size: 120px;
+    opacity: 0.05;
+    transform: rotate(-20deg);
+  }
+  .hero-title { font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  .hero-sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+
+  /* Layout */
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px 32px; }
+
+  /* Summary cards */
+  .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--accent-color, var(--accent));
+    border-radius: 12px 12px 0 0;
+  }
+  .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .card-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; }
+  .card-label { font-size: 12px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Chart grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-13 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 20px; }
+  .grid-31 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .full { margin-bottom: 20px; }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    overflow: hidden;
+  }
+  .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .chart-body { width: 100%; }
+
+  /* Section header */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 24px; border-top: 1px solid var(--border); margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-title">✈ Dashboard Penerbangan — FlightRadar24</div>
+  <div class="hero-sub">Analisis performa, rute, dan maskapai penerbangan Indonesia & hub regional</div>
+  <div class="hero-badge">📅 5 Mei 2026 — 23 Mei 2026 &nbsp;|&nbsp; 10 Bandara</div>
+</div>
+
+<div class="container">
+
+  <!-- Summary Cards -->
+  <div class="cards">
+    <div class="card" style="--accent-color:#3b82f6">
+      <div class="card-icon">✈️</div>
+      <div class="card-value">63.710</div>
+      <div class="card-label">Total Penerbangan</div>
+    </div>
+    <div class="card" style="--accent-color:#10b981">
+      <div class="card-icon">🕐</div>
+      <div class="card-value">71,3%</div>
+      <div class="card-label">On-Time Performance</div>
+    </div>
+    <div class="card" style="--accent-color:#ef4444">
+      <div class="card-icon">❌</div>
+      <div class="card-value">4,9%</div>
+      <div class="card-label">Tingkat Pembatalan</div>
+    </div>
+    <div class="card" style="--accent-color:#8b5cf6">
+      <div class="card-icon">🏢</div>
+      <div class="card-value">299</div>
+      <div class="card-label">Maskapai Aktif</div>
+    </div>
+    <div class="card" style="--accent-color:#f59e0b">
+      <div class="card-icon">🗺️</div>
+      <div class="card-value">273</div>
+      <div class="card-label">Rute Unik</div>
+    </div>
+  </div>
+
+  <!-- Trafik Harian -->
+  <div class="section-title">Trafik & Volume Penerbangan</div>
+  <div class="full">
+    <div class="chart-card">
+      <div class="chart-title">📈 Volume Penerbangan Harian</div>
+      <div class="chart-sub">Total penerbangan per hari (arrivals + departures) — 10 bandara</div>
+      <div id="c-daily" class="chart-body"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-title">🏢 Flight per Bandara</div>
+      <div class="chart-sub">Total penerbangan berdasarkan bandara</div>
+      <div id="c-bandara" class="chart-body"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🔄 Arrivals vs Departures per Bandara</div>
+      <div class="chart-sub">Perbandingan tipe penerbangan</div>
+      <div id="c-arrdep" class="chart-body"></div>
+    </div>
+  </div>
+
+  <!-- Maskapai -->
+  <div class="section-title">Analisis Maskapai</div>
+  <div class="grid-31">
+    <div class="chart-card">
+      <div class="chart-title">🏆 Top 15 Maskapai berdasarkan Jumlah Penerbangan</div>
+      <div class="chart-sub">Total penerbangan seluruh bandara yang dimonitor</div>
+      <div id="c-airlines" class="chart-body"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">❌ Top Maskapai dengan Pembatalan Terbanyak</div>
+      <div class="chart-sub">Jumlah absolut penerbangan dibatalkan</div>
+      <div id="c-cancel-airline" class="chart-body"></div>
+    </div>
+  </div>
+
+  <!-- OTP & Delay -->
+  <div class="section-title">On-Time Performance & Keterlambatan</div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-title">⏱️ Distribusi Keterlambatan</div>
+      <div class="chart-sub">Kategori delay berdasarkan selisih waktu aktual vs jadwal</div>
+      <div id="c-delay" class="chart-body"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">✅ OTP Top 15 Maskapai (min. 100 data aktual)</div>
+      <div class="chart-sub">% penerbangan tepat waktu atau delay ≤ 15 menit</div>
+      <div id="c-otp" class="chart-body"></div>
+    </div>
+  </div>
+
+  <!-- Pembatalan & Rute -->
+  <div class="section-title">Pembatalan & Rute</div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-title">🚫 Tingkat Pembatalan per Bandara (%)</div>
+      <div class="chart-sub">% penerbangan dibatalkan dari total jadwal di bandara tersebut</div>
+      <div id="c-cancel" class="chart-body"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🗺️ Top 15 Destinasi/Asal Tersibuk</div>
+      <div class="chart-sub">Berdasarkan kode IATA airport</div>
+      <div id="c-routes" class="chart-body"></div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="section-title">Distribusi Status Penerbangan</div>
+  <div class="grid-13">
+    <div class="chart-card">
+      <div class="chart-title">🥧 Distribusi Status Penerbangan</div>
+      <div class="chart-sub">Proporsi status dari seluruh data</div>
+      <div id="c-status" class="chart-body"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📊 Ringkasan Status</div>
+      <div class="chart-sub">Jumlah per kategori status</div>
+      <div id="c-status-bar" class="chart-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Data: FlightRadar24 scraping — 5–23 Mei 2026 &nbsp;|&nbsp; 10 Bandara: CGK, DPS, SUB, UPG, KNO, BPN, YIA, PKU, SIN, KUL</footer>
+
+<script>
+const DATA = {"summary":{"total_flights":63710,"cancel_rate":4.9,"otp":71.3,"total_airlines":299,"total_routes":273,"date_range":"2026-05-05 s/d 2026-05-23"},"daily":{"tanggal":["2026-05-05","2026-05-06","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23"],"flights":[4268,1281,4434,4229,4495,4479,4574,4395,4606,4483,4247,4490,4507,4662,4560]},"top_airlines":{"maskapai":["Batik Air","Lion Air","AirAsia","Singapore Airlines","Citilink","Malaysia Airlines","Garuda Indonesia","Super Air Jet","Scoot","Pelita Air","TransNusa","Sriwijaya Air","Wings Air","China Southern Airlines","Jetstar"],"flights":[6761,6205,5366,5268,4101,3751,3711,3339,2898,1642,1352,1120,1006,552,528]},"cancel_by_bandara":{"bandara":["SIN","KUL","DPS","UPG","CGK","YIA","SUB","KNO","PKU","BPN"],"total":[13526,14388,5667,4776,15922,1075,3932,2013,787,1624],"canceled":[23,240,117,369,1352,102,375,192,94,231],"cancel_rate":[0.1701316491201,1.667,2.0651762622,7.724,8.49,9.48,9.54,9.539,11.945,14.2]},"airline_otp":{"maskapai":["Citilink (Retro Livery)","Sichuan Airlines","Hainan Airlines","Pelita Air","Citilink Garuda Indonesia","Batik Air","TransNusa","AirAsia","Citilink","China Southern Airlines","Scoot","Singapore Airlines","Garuda Indonesia","Lion Air","Sriwijaya Air"],"otp":[87.8,84.5,84.0,83.5,83.3,82.1,81.7,81.0,80.7,80.4,79.7,77.6,75.4,73.9,73.0],"count":[107,116,200,1527,108,6354,1238,4968,3861,523,2795,5039,3539,5764,1050]},"top_routes":{"rute":["CGK","SIN","KUL","SUB","UPG","DPS","KNO","PEN","BPN","LOP","HKG","BTH","YIA","BKK","BDJ"],"flights":[6937,2696,2695,2605,2582,2403,1383,1290,1101,1062,977,976,956,898,837]},"status_dist":{"status":["Departed","Landed","Unknown","Canceled","Estimated","Scheduled","Other"],"count":[26782,26622,6070,3095,867,205,69]},"delay_dist":{"kategori":["Early >30m","Early 15-30m","Early <15m","On Time","Delay 1-15m","Delay 16-30m","Delay 31-60m","Delay >60m"],"count":[2367,8651,11359,16369,9405,3797,1490,967]},"bandara_count":{"bandara":["CGK","KUL","SIN","DPS","UPG","SUB","KNO","BPN","YIA","PKU"],"flights":[15922,14388,13526,5667,4776,3932,2013,1624,1075,787]},"arr_dep":{"bandara":["BPN","BPN","CGK","CGK","DPS","DPS","KNO","KNO","KUL","KUL","PKU","PKU","SIN","SIN","SUB","SUB","UPG","UPG","YIA","YIA"],"tipe":["arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures","arrivals","departures"],"count":[818,806,7955,7967,2837,2830,1012,1001,7191,7197,393,394,6762,6764,1976,1956,2384,2392,537,538]},"maskapai_cancel":{"maskapai":["Super Air Jet","Lion Air","Batik Air","Citilink","AirAsia","Garuda Indonesia","Wings Air","Malaysia Airlines","Sriwijaya Air","TransNusa","Pelita Air","Scoot"],"canceled":[389,377,367,341,275,198,190,177,143,131,74,49]}};
+
+const LAYOUT = (extra={}) => ({
+  paper_bgcolor: 'transparent',
+  plot_bgcolor: 'transparent',
+  font: { family: 'Segoe UI, system-ui, sans-serif', color: '#94a3b8', size: 11 },
+  margin: { t: 10, r: 10, b: 40, l: 10 },
+  xaxis: { gridcolor: 'rgba(255,255,255,0.05)', zerolinecolor: 'rgba(255,255,255,0.1)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)', zerolinecolor: 'rgba(255,255,255,0.1)' },
+  colorway: ['#3b82f6','#06b6d4','#8b5cf6','#10b981','#f59e0b','#ef4444','#ec4899','#84cc16','#f97316','#a78bfa'],
+  legend: { bgcolor: 'transparent', font: { color: '#94a3b8' } },
+  ...extra
+});
+
+const CONFIG = { responsive: true, displayModeBar: false };
+
+// 1. Daily
+Plotly.newPlot('c-daily', [{
+  x: DATA.daily.tanggal,
+  y: DATA.daily.flights,
+  type: 'scatter',
+  mode: 'lines+markers',
+  fill: 'tozeroy',
+  fillcolor: 'rgba(59,130,246,0.12)',
+  line: { color: '#3b82f6', width: 2.5 },
+  marker: { color: '#3b82f6', size: 7, line: { color: '#fff', width: 1.5 } },
+  hovertemplate: '<b>%{x}</b><br>%{y:,} penerbangan<extra></extra>'
+}], { ...LAYOUT(), height: 220, margin: { t: 10, r: 20, b: 50, l: 60 },
+  xaxis: { gridcolor: 'rgba(255,255,255,0.05)', tickangle: -30 },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
+}, CONFIG);
+
+// 2. Bandara count - treemap-like bar
+Plotly.newPlot('c-bandara', [{
+  x: DATA.bandara_count.flights,
+  y: DATA.bandara_count.bandara,
+  type: 'bar',
+  orientation: 'h',
+  marker: {
+    color: DATA.bandara_count.flights,
+    colorscale: [[0,'#1e3a5f'],[0.5,'#3b82f6'],[1,'#06b6d4']],
+    showscale: false
+  },
+  text: DATA.bandara_count.flights.map(v => v.toLocaleString('id')),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>%{x:,} penerbangan<extra></extra>'
+}], { ...LAYOUT(), height: 280, margin: { t: 10, r: 70, b: 30, l: 50 },
+  xaxis: { gridcolor: 'rgba(255,255,255,0.05)', showticklabels: false },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
+}, CONFIG);
+
+// 3. Arr vs Dep
+const bandara_list = [...new Set(DATA.arr_dep.bandara)];
+const arr_data = bandara_list.map(b => {
+  const i = DATA.arr_dep.bandara.findIndex((x,idx) => x===b && DATA.arr_dep.tipe[idx]==='arrivals');
+  return i>=0 ? DATA.arr_dep.count[i] : 0;
+});
+const dep_data = bandara_list.map(b => {
+  const i = DATA.arr_dep.bandara.findIndex((x,idx) => x===b && DATA.arr_dep.tipe[idx]==='departures');
+  return i>=0 ? DATA.arr_dep.count[i] : 0;
+});
+Plotly.newPlot('c-arrdep', [
+  { name: 'Arrivals', x: bandara_list, y: arr_data, type: 'bar', marker: { color: '#06b6d4' }, hovertemplate: '%{x} Arrivals: %{y:,}<extra></extra>' },
+  { name: 'Departures', x: bandara_list, y: dep_data, type: 'bar', marker: { color: '#8b5cf6' }, hovertemplate: '%{x} Departures: %{y:,}<extra></extra>' }
+], { ...LAYOUT({ barmode: 'group' }), height: 280, margin: { t: 10, r: 10, b: 40, l: 60 },
+  legend: { orientation: 'h', y: -0.15, bgcolor: 'transparent', font: { color: '#94a3b8' } }
+}, CONFIG);
+
+// 4. Top airlines
+Plotly.newPlot('c-airlines', [{
+  x: DATA.top_airlines.flights,
+  y: DATA.top_airlines.maskapai,
+  type: 'bar',
+  orientation: 'h',
+  marker: {
+    color: DATA.top_airlines.flights,
+    colorscale: [[0,'#1e3a5f'],[0.4,'#3b82f6'],[1,'#06b6d4']],
+    showscale: false
+  },
+  text: DATA.top_airlines.flights.map(v => v.toLocaleString('id')),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>%{x:,} penerbangan<extra></extra>'
+}], { ...LAYOUT(), height: 380, margin: { t: 10, r: 80, b: 30, l: 160 },
+  xaxis: { showticklabels: false, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)', autorange: 'reversed' }
+}, CONFIG);
+
+// 5. Cancel per airline
+Plotly.newPlot('c-cancel-airline', [{
+  x: DATA.maskapai_cancel.canceled,
+  y: DATA.maskapai_cancel.maskapai,
+  type: 'bar',
+  orientation: 'h',
+  marker: { color: '#ef4444' },
+  text: DATA.maskapai_cancel.canceled,
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>%{x} pembatalan<extra></extra>'
+}], { ...LAYOUT(), height: 380, margin: { t: 10, r: 50, b: 30, l: 120 },
+  xaxis: { showticklabels: false, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)', autorange: 'reversed' }
+}, CONFIG);
+
+// 6. Delay distribution
+const delayColors = ['#06b6d4','#3b82f6','#a78bfa','#10b981','#f59e0b','#f97316','#ef4444','#b91c1c'];
+Plotly.newPlot('c-delay', [{
+  x: DATA.delay_dist.count,
+  y: DATA.delay_dist.kategori,
+  type: 'bar',
+  orientation: 'h',
+  marker: { color: delayColors },
+  text: DATA.delay_dist.count.map(v => v.toLocaleString('id')),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>%{x:,} penerbangan<extra></extra>'
+}], { ...LAYOUT(), height: 320, margin: { t: 10, r: 80, b: 30, l: 130 },
+  xaxis: { showticklabels: false, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
+}, CONFIG);
+
+// 7. OTP per airline
+const otpColors = DATA.airline_otp.otp.map(v => v >= 85 ? '#10b981' : v >= 75 ? '#3b82f6' : v >= 65 ? '#f59e0b' : '#ef4444');
+Plotly.newPlot('c-otp', [{
+  x: DATA.airline_otp.otp,
+  y: DATA.airline_otp.maskapai,
+  type: 'bar',
+  orientation: 'h',
+  marker: { color: otpColors },
+  text: DATA.airline_otp.otp.map(v => v.toFixed(1) + '%'),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>OTP: %{x:.1f}%<extra></extra>'
+}], { ...LAYOUT(), height: 320, margin: { t: 10, r: 70, b: 30, l: 175 },
+  xaxis: { range: [0, 105], showticklabels: false, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)', autorange: 'reversed' }
+}, CONFIG);
+
+// 8. Cancel rate per bandara
+const crColors = DATA.cancel_by_bandara.cancel_rate.map(v => v < 3 ? '#10b981' : v < 8 ? '#f59e0b' : '#ef4444');
+Plotly.newPlot('c-cancel', [{
+  x: DATA.cancel_by_bandara.cancel_rate.map(v => +v.toFixed(1)),
+  y: DATA.cancel_by_bandara.bandara,
+  type: 'bar',
+  orientation: 'h',
+  marker: { color: crColors },
+  text: DATA.cancel_by_bandara.cancel_rate.map(v => (+v).toFixed(1) + '%'),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>Cancel rate: %{x:.1f}%<extra></extra>'
+}], { ...LAYOUT(), height: 300, margin: { t: 10, r: 70, b: 30, l: 60 },
+  xaxis: { showticklabels: false, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
+}, CONFIG);
+
+// 9. Top routes
+Plotly.newPlot('c-routes', [{
+  x: DATA.top_routes.flights,
+  y: DATA.top_routes.rute,
+  type: 'bar',
+  orientation: 'h',
+  marker: {
+    color: DATA.top_routes.flights,
+    colorscale: [[0,'#1e3a5f'],[0.5,'#8b5cf6'],[1,'#06b6d4']],
+    showscale: false
+  },
+  text: DATA.top_routes.flights.map(v => v.toLocaleString('id')),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{y}</b><br>%{x:,} penerbangan<extra></extra>'
+}], { ...LAYOUT(), height: 300, margin: { t: 10, r: 80, b: 30, l: 50 },
+  xaxis: { showticklabels: false, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)', autorange: 'reversed' }
+}, CONFIG);
+
+// 10. Status donut
+const statusColors = {'Departed':'#3b82f6','Landed':'#10b981','Unknown':'#94a3b8','Canceled':'#ef4444','Estimated':'#f59e0b','Scheduled':'#06b6d4','Other':'#8b5cf6'};
+Plotly.newPlot('c-status', [{
+  labels: DATA.status_dist.status,
+  values: DATA.status_dist.count,
+  type: 'pie',
+  hole: 0.55,
+  marker: { colors: DATA.status_dist.status.map(s => statusColors[s] || '#64748b'), line: { color: '#0a0e1a', width: 2 } },
+  textinfo: 'percent',
+  textfont: { color: '#fff', size: 12 },
+  hovertemplate: '<b>%{label}</b><br>%{value:,}<br>%{percent}<extra></extra>'
+}], { ...LAYOUT(), height: 300, margin: { t: 10, r: 10, b: 10, l: 10 },
+  legend: { orientation: 'v', x: 1, y: 0.5, font: { color: '#94a3b8' } },
+  annotations: [{ text: '<b>63.710</b><br>total', x: 0.5, y: 0.5, font: { size: 13, color: '#e2e8f0' }, showarrow: false }]
+}, CONFIG);
+
+// 11. Status bar
+Plotly.newPlot('c-status-bar', [{
+  x: DATA.status_dist.status,
+  y: DATA.status_dist.count,
+  type: 'bar',
+  marker: { color: DATA.status_dist.status.map(s => statusColors[s] || '#64748b') },
+  text: DATA.status_dist.count.map(v => v.toLocaleString('id')),
+  textposition: 'outside',
+  textfont: { color: '#e2e8f0', size: 11 },
+  hovertemplate: '<b>%{x}</b><br>%{y:,}<extra></extra>'
+}], { ...LAYOUT(), height: 300, margin: { t: 10, r: 10, b: 60, l: 60 },
+  xaxis: { tickangle: -20, gridcolor: 'rgba(255,255,255,0.05)' },
+  yaxis: { gridcolor: 'rgba(255,255,255,0.05)' }
+}, CONFIG);
+</script>
+</body>
+</html>

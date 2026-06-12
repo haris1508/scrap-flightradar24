@@ -1,6 +1,12 @@
 # Temp file Excel (lock file saat dibuka)
 ~$*.xlsx
 
+# macOS
+.DS_Store
+
+# Claude Code (config lokal)
+.claude/
+
 # Python cache
 __pycache__/
 *.pyc
