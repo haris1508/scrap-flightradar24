@@ -404,6 +404,15 @@ def main():
             all_rows.extend(rows)
             time.sleep(2)
 
+    # ── Gagalkan run kalau tidak ada data sama sekali ───────────────────
+    # Mencegah "silent success": dulu scraper yang gagal ambil data tetap
+    # exit 0 sehingga retry & notifikasi issue tidak kepicu, dan tanggal itu
+    # hilang permanen. Sekarang exit non-zero → retry 3x + issue otomatis.
+    if not all_rows:
+        print("\n[GAGAL] Tidak ada data H-1 yang berhasil diambil "
+              "(kemungkinan diblokir/halaman berubah). Exit code 1.")
+        sys.exit(1)
+
     save(all_rows)
     print(f"\n  Selesai: {datetime.now(WIB).strftime('%Y-%m-%d %H:%M:%S WIB')}")
 
