@@ -24,7 +24,9 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Run normal ~10 menit. Beri ruang untuk retry 3x (~30 menit) + commit,
+    # supaya job tidak dibatalkan di tengah retry dan notifikasi tetap terkirim.
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repo
@@ -64,8 +66,10 @@ jobs:
           git push
 
       # ── Notifikasi otomatis via GitHub Issue jika gagal ─────────────────
+      # cancelled() ikut ditangkap: job yang kena timeout berstatus "cancelled",
+      # bukan "failure", sehingga dulu lolos tanpa notifikasi.
       - name: Buat issue jika gagal
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/github-script@v7
         with:
           script: |
@@ -86,6 +90,7 @@ jobs:
                 '### Kemungkinan penyebab:',
                 '- FlightRadar24 memblokir sementara (anti-bot)',
                 '- Timeout saat membuka halaman',
+                '- Job kena batas waktu (status "cancelled") — retry 3x kelamaan',
                 '- Perubahan struktur halaman FR24',
                 '',
                 '### Solusi:',
