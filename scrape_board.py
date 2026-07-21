@@ -269,9 +269,13 @@ def save(all_rows: list):
         return
 
     # Format nama file: YYMMDD-Flightradar (tanggal data yang diambil)
+    # Hasil dipisah per format: Excel ke excel/, CSV ke csv/
+    import os
+    os.makedirs("excel", exist_ok=True)
+    os.makedirs("csv",   exist_ok=True)
     date_str = datetime.strptime(TARGET_DATE, "%Y-%m-%d").strftime("%y%m%d")
-    xlsx     = f"{date_str}-Flightradar.xlsx"
-    csv_f    = f"{date_str}-Flightradar.csv"
+    xlsx     = os.path.join("excel", f"{date_str}-Flightradar.xlsx")
+    csv_f    = os.path.join("csv",   f"{date_str}-Flightradar.csv")
 
     df = pd.DataFrame(all_rows)
     # Urutkan: bandara → tipe → tanggal → waktu_jadwal
