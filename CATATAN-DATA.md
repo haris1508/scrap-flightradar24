@@ -48,7 +48,10 @@ Format tanggal file olahan: `dd-mmm-yy`. Hari gagal scrape **sudah dibuang**.
 ### Tanggal yang hilang (tak bisa dipulihkan — FR24 tak simpan histori)
 
 - Tidak pernah ter-scrape: `260507`–`260510`, `260528`, `260602`, `260624`, `260626`, `260702`, `260713`, `260715`, `260717`
-- Ter-scrape tapi **parsial/gagal**, jangan dipakai: `260506`, `260524`
+- Parsial/rusak dan **sudah dihapus** dari repo: `260506`, `260524` (dulu isinya cuma sebagian; dibuang agar tidak jadi data cacat)
+
+Jadi tanggal yang ADA di `csv/` & `excel/` semuanya lengkap. Tidak perlu lagi
+menyaring hari gagal saat mengolah — GAGAL-set di skrip olahan boleh dikosongkan.
 
 ---
 
