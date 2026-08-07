@@ -6,7 +6,12 @@ Repo ini berisi **2 dataset berbeda**. Jangan dicampur: skala dan cakupannya jau
 
 ## Dataset A — Papan Arrival/Departure per Bandara (utama, otomatis)
 
-Scraper: [`scrape_board.py`](scrape_board.py) · Otomatis tiap hari 05.00 WIB via GitHub Actions ([`.github/workflows/scrape.yml`](.github/workflows/scrape.yml)), mengambil data **H-1**.
+Scraper: [`scrape_board.py`](scrape_board.py) · Otomatis via GitHub Actions ([`.github/workflows/scrape.yml`](.github/workflows/scrape.yml)), mengambil data **H-1**.
+
+Jadwal: **05.00 WIB** (utama), lalu **10.00** dan **14.00 WIB** sebagai cadangan.
+Cadangan otomatis dilewati kalau data H-1 sudah ada, jadi hanya jalan saat
+percobaan sebelumnya gagal. Notifikasi issue hanya terbit dari percobaan
+terakhir (14.00), supaya satu hari gagal tidak menghasilkan 3 issue.
 
 **Output harian:**
 - `csv/YYMMDD-Flightradar.csv`

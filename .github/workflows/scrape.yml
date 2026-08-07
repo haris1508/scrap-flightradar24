@@ -13,9 +13,14 @@ on:
           - yesterday   # H-1 ← default
           - today       # Hari ini
 
-  # ── Otomatis setiap hari jam 05.00 WIB (22.00 UTC malam sebelumnya), ambil data H-1 ─────
+  # ── Otomatis harian, ambil data H-1 ────────────────────────────────────
+  # Tiga jadwal: utama + dua cadangan. Cadangan otomatis dilewati kalau data
+  # H-1 sudah ada, jadi hanya benar-benar jalan saat percobaan sebelumnya
+  # gagal (FR24 kadang memblokir sesaat, biasanya reda beberapa jam kemudian).
   schedule:
-    - cron: '0 22 * * *'
+    - cron: '0 22 * * *'   # 05.00 WIB — utama
+    - cron: '0 3 * * *'    # 10.00 WIB — cadangan 1
+    - cron: '0 7 * * *'    # 14.00 WIB — cadangan 2 (terakhir; notifikasi dari sini)
 
 permissions:
   contents: write   # untuk commit & push hasil ke repo
@@ -32,18 +37,36 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # Cadangan siang tidak perlu jalan kalau data H-1 sudah berhasil diambil
+      # pada percobaan sebelumnya. Hanya berlaku untuk jadwal otomatis —
+      # trigger manual selalu dijalankan (mis. sengaja scrape ulang).
+      - name: Cek apakah data H-1 sudah ada
+        id: cek
+        run: |
+          TARGET=$(TZ=Asia/Jakarta date -d 'yesterday' +%y%m%d)
+          echo "Target H-1: $TARGET"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -f "csv/${TARGET}-Flightradar.csv" ]; then
+            echo "Data sudah ada — lewati run ini."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup Python
+        if: steps.cek.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
+        if: steps.cek.outputs.skip != 'true'
         run: |
           sudo apt-get update
           pip install -r requirements.txt
           playwright install --with-deps chromium
 
       - name: Run scraper (retry 3x jika gagal)
+        if: steps.cek.outputs.skip != 'true'
         run: |
           for i in 1 2 3; do
             echo "=== Attempt $i ==="
@@ -58,6 +81,7 @@ jobs:
           done
 
       - name: Commit & push hasil ke repo
+        if: steps.cek.outputs.skip != 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -68,8 +92,12 @@ jobs:
       # ── Notifikasi otomatis via GitHub Issue jika gagal ─────────────────
       # cancelled() ikut ditangkap: job yang kena timeout berstatus "cancelled",
       # bukan "failure", sehingga dulu lolos tanpa notifikasi.
+      # Hanya terbit dari percobaan TERAKHIR hari itu (cadangan 14.00 WIB) atau
+      # trigger manual — supaya satu hari gagal tidak menghasilkan 3 issue.
       - name: Buat issue jika gagal
-        if: failure() || cancelled()
+        if: >
+          (failure() || cancelled()) &&
+          (github.event.schedule == '0 7 * * *' || github.event_name == 'workflow_dispatch')
         uses: actions/github-script@v7
         with:
           script: |
