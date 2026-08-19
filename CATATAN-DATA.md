@@ -8,10 +8,15 @@ Repo ini berisi **2 dataset berbeda**. Jangan dicampur: skala dan cakupannya jau
 
 Scraper: [`scrape_board.py`](scrape_board.py) · Otomatis via GitHub Actions ([`.github/workflows/scrape.yml`](.github/workflows/scrape.yml)), mengambil data **H-1**.
 
-Jadwal: **05.00 WIB** (utama), lalu **10.00** dan **14.00 WIB** sebagai cadangan.
+Jadwal: **01.15 WIB** (utama), cadangan **05.15**, **09.15**, **13.15 WIB**.
 Cadangan otomatis dilewati kalau data H-1 sudah ada, jadi hanya jalan saat
 percobaan sebelumnya gagal. Notifikasi issue hanya terbit dari percobaan
-terakhir (14.00), supaya satu hari gagal tidak menghasilkan 3 issue.
+terakhir (13.15), supaya satu hari gagal tidak menghasilkan banyak issue.
+
+**Makin awal di-scrape, makin utuh datanya** — paginasi "Load earlier flights"
+harus mundur lebih sedikit jam. Data yang diselamatkan cadangan siang bisa
+lebih tipis: `260818` (diselamatkan ~10.40 WIB) hanya 4.555 baris vs normal
+~4.800–4.900. Batas paginasi dinaikkan 20 → 30 klik untuk menekan efek ini.
 
 **Output harian:**
 - `csv/YYMMDD-Flightradar.csv`

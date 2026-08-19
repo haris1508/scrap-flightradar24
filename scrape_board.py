@@ -200,7 +200,9 @@ def scrape_airport_board(iata: str, board_type: str) -> list[dict]:
         }""")
 
         # ── Klik "Load earlier flights" sampai mencapai data H-1 ─────────
-        max_clicks = 20
+        # 30 klik (naik dari 20): run cadangan siang harus mundur lebih jauh
+        # untuk mencapai awal hari H-1; batas 20 dulu memotong jam-jam awal.
+        max_clicks = 30
         clicks = 0
         reached_yesterday = False
 

@@ -14,13 +14,17 @@ on:
           - today       # Hari ini
 
   # ── Otomatis harian, ambil data H-1 ────────────────────────────────────
-  # Tiga jadwal: utama + dua cadangan. Cadangan otomatis dilewati kalau data
-  # H-1 sudah ada, jadi hanya benar-benar jalan saat percobaan sebelumnya
-  # gagal (FR24 kadang memblokir sesaat, biasanya reda beberapa jam kemudian).
+  # Empat jadwal: utama + tiga cadangan. Cadangan otomatis dilewati kalau data
+  # H-1 sudah ada, jadi hanya benar-benar jalan saat percobaan sebelumnya gagal
+  # (FR24 kadang memblokir sesaat, biasanya reda beberapa jam kemudian).
+  # Sengaja dimajukan ke dini hari: makin awal di-scrape, makin sedikit jam
+  # yang harus dimundurkan lewat 'Load earlier flights', jadi data lebih utuh.
+  # Menit :15 dipakai untuk menghindari antrean runner di menit :00.
   schedule:
-    - cron: '0 22 * * *'   # 05.00 WIB — utama
-    - cron: '0 3 * * *'    # 10.00 WIB — cadangan 1
-    - cron: '0 7 * * *'    # 14.00 WIB — cadangan 2 (terakhir; notifikasi dari sini)
+    - cron: '15 18 * * *'  # 01.15 WIB — utama (paling awal = paling lengkap)
+    - cron: '15 22 * * *'  # 05.15 WIB — cadangan 1
+    - cron: '15 2 * * *'   # 09.15 WIB — cadangan 2
+    - cron: '15 6 * * *'   # 13.15 WIB — cadangan 3 (terakhir; notifikasi dari sini)
 
 permissions:
   contents: write   # untuk commit & push hasil ke repo
@@ -92,12 +96,12 @@ jobs:
       # ── Notifikasi otomatis via GitHub Issue jika gagal ─────────────────
       # cancelled() ikut ditangkap: job yang kena timeout berstatus "cancelled",
       # bukan "failure", sehingga dulu lolos tanpa notifikasi.
-      # Hanya terbit dari percobaan TERAKHIR hari itu (cadangan 14.00 WIB) atau
+      # Hanya terbit dari percobaan TERAKHIR hari itu (cadangan 13.15 WIB) atau
       # trigger manual — supaya satu hari gagal tidak menghasilkan 3 issue.
       - name: Buat issue jika gagal
         if: >
           (failure() || cancelled()) &&
-          (github.event.schedule == '0 7 * * *' || github.event_name == 'workflow_dispatch')
+          (github.event.schedule == '15 6 * * *' || github.event_name == 'workflow_dispatch')
         uses: actions/github-script@v7
         with:
           script: |
