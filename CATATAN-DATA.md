@@ -24,12 +24,19 @@ lebih tipis: `260818` (diselamatkan ~10.40 WIB) hanya 4.555 baris vs normal
 
 **Cakupan:** 13 bandara — 11 Indonesia (CGK, DPS, BPN, KNO, PKU, SUB, UPG, YIA, LOP, KOE, LBJ) + 2 luar negeri (SIN, KUL). Mulai 5 Mei 2026.
 
-> ⚠️ **Ada patahan deret waktu.** LOP (Lombok), KOE (Kupang), dan LBJ (Labuan
-> Bajo) baru ditambahkan **21 Agustus 2026**. Sebelum tanggal itu ketiganya
-> hanya muncul sebagai *lawan* (asal/tujuan), bukan sebagai bandara terpantau.
-> Akibatnya angka domestik harian **melonjak** mulai tanggal tersebut — bukan
-> karena trafik naik, tapi karena cakupan bertambah. Jangan bandingkan
-> sebelum/sesudah 21 Agt 2026 tanpa menyesuaikan cakupan.
+> ⚠️ **Cakupan bertambah 25 Agustus 2026** — LOP (Lombok), KOE (Kupang), LBJ
+> (Labuan Bajo) mulai dipantau. Data pertama yang memuat ketiganya adalah
+> **tanggal 25 Agt 2026** (ter-scrape dini hari 26 Agt); `260821`–`260824`
+> masih 10 bandara. Sebelum tanggal itu ketiganya hanya muncul
+> sebagai *lawan* (asal/tujuan), bukan sebagai bandara terpantau.
+>
+> **File olahan sengaja TIDAK ikut berubah** — tetap memakai 8 bandara awal
+> (`ID8` di `regenerate_olahan.py`, sudah dikunci) supaya deret waktu dan
+> grafik kontinu. Data 3 bandara baru tetap lengkap di `csv/` & `excel/`
+> untuk analisis terpisah.
+>
+> Kalau suatu saat ID8 diperluas jadi 11, sadari angka harian akan melonjak
+> mulai 25 Agt 2026 — itu efek cakupan, bukan kenaikan trafik.
 
 **Kolom:** bandara, tipe (arrivals/departures), tanggal, waktu_jadwal, waktu_aktual, nomor_flight, callsign, asal_tujuan_iata, asal_tujuan_nama, maskapai, maskapai_iata, kode_pesawat, nama_pesawat, registrasi, status, scraped_at.
 
@@ -39,7 +46,7 @@ lebih tipis: `260818` (diselamatkan ~10.40 WIB) hanya 4.555 baris vs normal
 
 ### Definisi baku yang dipakai (penting, sudah disepakati)
 
-- **Domestik** = kedua ujung penerbangan di Indonesia. Praktisnya: `bandara` ∈ 8 bandara Indonesia **dan** `asal_tujuan_iata` ∈ daftar bandara Indonesia. SIN & KUL tidak pernah domestik.
+- **Domestik** = kedua ujung penerbangan di Indonesia. Praktisnya: `bandara` ∈ **8 bandara awal** (CGK, DPS, BPN, KNO, PKU, SUB, UPG, YIA — dibekukan demi kontinuitas) **dan** `asal_tujuan_iata` ∈ daftar bandara Indonesia. SIN & KUL tidak pernah domestik.
 - **Direct** = semua baris papan FR24 memang segmen point-to-point (bukan transit).
 - **Berhasil / realized** = arrival berstatus `Landed` + departure berstatus `Departed`. Status lain (Canceled, Diverted, Estimated, Scheduled, Unknown) dibuang.
 - **Normalisasi maskapai** = buang embel-embel livery dalam kurung; `Indonesia AirAsia`→`AirAsia`, `Citilink Garuda Indonesia`→`Citilink`, `Nam Air`/`NAM Air` disatukan.
