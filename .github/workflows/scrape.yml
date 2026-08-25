@@ -33,9 +33,10 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # Run normal ~10 menit. Beri ruang untuk retry 3x (~30 menit) + commit,
-    # supaya job tidak dibatalkan di tengah retry dan notifikasi tetap terkirim.
-    timeout-minutes: 60
+    # Run normal ~15 menit (13 bandara). Run yang gagal memakan ~3x lebih lama
+    # karena retry, jadi beri ruang lega supaya job tidak dibatalkan di tengah
+    # retry dan notifikasi tetap terkirim.
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repo

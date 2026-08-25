@@ -1,6 +1,6 @@
 """
 Scraping Arrival & Departure Board FlightRadar24
-Bandara: CGK, DPS, BPN, KNO, PKU, SUB, UPG, YIA, SIN, KUL
+Bandara: CGK, DPS, BPN, KNO, PKU, SUB, UPG, YIA, LOP, KOE, LBJ, SIN, KUL
 - Mode 24 jam (uncheck 12-hour clock)
 - Data H-1 via klik "Load earlier flights"
 - Intercept respons JSON langsung dari dalam browser Playwright
@@ -24,6 +24,9 @@ AIRPORTS = {
     "SUB": "Surabaya Juanda",
     "UPG": "Makassar Sultan Hasanuddin",
     "YIA": "Yogyakarta International",
+    "LOP": "Lombok Praya Zainuddin Abdul Madjid",
+    "KOE": "Kupang El Tari",
+    "LBJ": "Labuan Bajo Komodo",
     "SIN": "Singapore Changi",
     "KUL": "Kuala Lumpur International",
 }

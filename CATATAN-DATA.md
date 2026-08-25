@@ -22,7 +22,14 @@ lebih tipis: `260818` (diselamatkan ~10.40 WIB) hanya 4.555 baris vs normal
 - `csv/YYMMDD-Flightradar.csv`
 - `excel/YYMMDD-Flightradar.xlsx`
 
-**Cakupan:** 10 bandara — 8 Indonesia (CGK, DPS, BPN, KNO, PKU, SUB, UPG, YIA) + 2 luar negeri (SIN, KUL). Mulai 5 Mei 2026.
+**Cakupan:** 13 bandara — 11 Indonesia (CGK, DPS, BPN, KNO, PKU, SUB, UPG, YIA, LOP, KOE, LBJ) + 2 luar negeri (SIN, KUL). Mulai 5 Mei 2026.
+
+> ⚠️ **Ada patahan deret waktu.** LOP (Lombok), KOE (Kupang), dan LBJ (Labuan
+> Bajo) baru ditambahkan **21 Agustus 2026**. Sebelum tanggal itu ketiganya
+> hanya muncul sebagai *lawan* (asal/tujuan), bukan sebagai bandara terpantau.
+> Akibatnya angka domestik harian **melonjak** mulai tanggal tersebut — bukan
+> karena trafik naik, tapi karena cakupan bertambah. Jangan bandingkan
+> sebelum/sesudah 21 Agt 2026 tanpa menyesuaikan cakupan.
 
 **Kolom:** bandara, tipe (arrivals/departures), tanggal, waktu_jadwal, waktu_aktual, nomor_flight, callsign, asal_tujuan_iata, asal_tujuan_nama, maskapai, maskapai_iata, kode_pesawat, nama_pesawat, registrasi, status, scraped_at.
 
