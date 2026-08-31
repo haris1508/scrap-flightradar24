@@ -100,11 +100,19 @@ Scraper: [`scrape_statistics.py`](scrape_statistics.py) · Sumber: <https://www.
 
 ## Alur kerja rutin
 
-```bash
-git pull                      # tarik data terbaru dari GitHub Actions
-python scrape_statistics.py   # (opsional) perbarui statistik global
-```
+**Otomatis (tidak perlu tindakan).** LaunchAgent `com.haris.flightradar-pull`
+menjalankan [`auto-update.sh`](auto-update.sh) pada **08.00 / 14.00 / 20.00 WIB**:
+`git pull` lalu regenerasi file olahan. Tiga kali sehari karena jadwal GitHub
+Actions kerap tertunda 1–6 jam, jadi data bisa mendarat kapan saja.
 
-File olahan Dataset A perlu digenerate ulang setelah `git pull` agar ikut tanggal terbaru.
+Log: `~/Library/Logs/flightradar-update.log`
+Plist: `~/Library/LaunchAgents/com.haris.flightradar-pull.plist`
+
+Manual (kalau perlu segera):
+
+```bash
+./auto-update.sh              # pull + regenerasi file olahan
+python scrape_statistics.py   # (opsional) perbarui statistik global Dataset B
+```
 
 Automation hanya meng-commit `csv/` dan `excel/`. File olahan disimpan **lokal saja** (tidak di-push) sesuai preferensi.
