@@ -69,6 +69,26 @@ Kalau butuh penerbangan unik, jangan pakai penjumlahan ini apa adanya.
 
 Format tanggal file olahan: `dd-mmm-yy`. Hari gagal scrape **sudah dibuang**.
 
+### Pemeriksaan mutu otomatis (sejak 7 Sep 2026)
+
+FR24 punya mode gagal yang licik: **tetap mengirim baris dalam jumlah wajar,
+tapi statusnya belum final** (Unknown/Canceled/Estimated). File lolos semua
+pemeriksaan berbasis jumlah baris, padahal isinya tak terpakai. Contohnya
+`260906`: 5.100 baris terlihat normal, tapi CGK hanya 11 realized dari 1.233
+baris — angka olahan hari itu jatuh ke 481 dari biasanya ~1.430.
+
+`cek_mutu()` di [`scrape_board.py`](scrape_board.py) menolak menyimpan kalau:
+- ada bandara yang **tidak menghasilkan baris sama sekali**, atau
+- **CGK** < 800 baris, atau realized CGK < 50%.
+
+CGK dipakai sebagai indikator karena porsinya ~seperempat data dan paling
+stabil (normal: ~1.200 baris, realized 74–82%). Bandara lain tidak dijadikan
+ambang karena wajar-wajar saja rendah — mis. **UPG normal hanya 41–53%**.
+
+Konsekuensinya: hari yang datanya cacat akan **kosong** (dan memicu retry +
+notifikasi), bukan tersimpan diam-diam. Ini disengaja — hari kosong terlihat
+jelas, sedangkan data cacat merusak deret waktu tanpa ketahuan.
+
 ### Tanggal yang hilang (tak bisa dipulihkan — FR24 tak simpan histori)
 
 - Tidak pernah ter-scrape: `260507`–`260510`, `260528`, `260602`, `260624`, `260626`, `260702`, `260713`, `260715`, `260717`

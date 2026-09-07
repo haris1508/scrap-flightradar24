@@ -395,6 +395,45 @@ def save(all_rows: list):
     print(df[cols].head(5).to_string(index=False))
 
 
+def cek_mutu(all_rows: list) -> list:
+    """Kembalikan daftar masalah mutu; kosong berarti data sehat.
+
+    Menangkap "degradasi diam-diam": FR24 kadang tetap mengirim baris dalam
+    jumlah wajar, tapi statusnya belum final (Unknown/Canceled/Estimated).
+    File jadi lolos pemeriksaan jumlah baris padahal isinya tidak terpakai —
+    persis yang terjadi pada 260906 (CGK 1.233 baris, hanya 11 realized).
+
+    CGK dipakai sebagai indikator utama karena porsinya ~seperempat data dan
+    paling stabil: pada 14 hari normal barisnya ~1.200-1.250 dengan realized
+    74-82%. Saat cacat, angkanya jatuh ke 0-1%. Ambang 800 baris / 50% memberi
+    jarak aman yang lebar. Bandara lain tidak dipakai sebagai ambang karena
+    sebarannya wajar-wajar saja rendah (mis. UPG normal hanya 41-53%).
+    """
+    masalah = []
+    per = {}
+    for r in all_rows:
+        st = per.setdefault(r["bandara"], [0, 0])
+        st[0] += 1
+        if ((r["tipe"] == "arrivals" and r["status"].startswith("Landed")) or
+                (r["tipe"] == "departures" and r["status"].startswith("Departed"))):
+            st[1] += 1
+
+    for iata in AIRPORTS:
+        if per.get(iata, [0, 0])[0] == 0:
+            masalah.append(f"{iata}: tidak ada baris sama sekali")
+
+    baris, real = per.get("CGK", [0, 0])
+    if baris:
+        if baris < 800:
+            masalah.append(f"CGK: baris hanya {baris} (normal ~1.200)")
+        elif real / baris < 0.50:
+            masalah.append(
+                f"CGK: realized {real}/{baris} = {100*real/baris:.0f}% "
+                f"(normal 74-82%) - status belum final"
+            )
+    return masalah
+
+
 def main():
     label = "Hari Ini" if MODE == "today" else "H-1"
     print("=" * 60)
@@ -420,6 +459,17 @@ def main():
     if not all_rows:
         print("\n[GAGAL] Tidak ada data H-1 yang berhasil diambil "
               "(kemungkinan diblokir/halaman berubah). Exit code 1.")
+        sys.exit(1)
+
+    # ── Tolak data cacat sebelum disimpan ──────────────────────────────
+    # Lebih baik hari itu kosong (terlihat jelas) daripada tersimpan diam-diam
+    # dengan isi tak terpakai yang merusak deret waktu file olahan.
+    masalah = cek_mutu(all_rows)
+    if masalah:
+        print("\n[GAGAL] Mutu data tidak lolos:")
+        for m in masalah:
+            print(f"  - {m}")
+        print("  Data TIDAK disimpan; retry & notifikasi akan berjalan.")
         sys.exit(1)
 
     save(all_rows)
