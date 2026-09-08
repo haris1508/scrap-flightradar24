@@ -69,30 +69,43 @@ Kalau butuh penerbangan unik, jangan pakai penjumlahan ini apa adanya.
 
 Format tanggal file olahan: `dd-mmm-yy`. Hari gagal scrape **sudah dibuang**.
 
-### Pemeriksaan mutu otomatis (sejak 7 Sep 2026)
+### Gangguan CGK 5-7 Sep 2026 - ANGKANYA ASLI, JANGAN DIBUANG
 
-FR24 punya mode gagal yang licik: **tetap mengirim baris dalam jumlah wajar,
-tapi statusnya belum final** (Unknown/Canceled/Estimated). File lolos semua
-pemeriksaan berbasis jumlah baris, padahal isinya tak terpakai. Contohnya
-`260906`: 5.100 baris terlihat normal, tapi CGK hanya 11 realized dari 1.233
-baris — angka olahan hari itu jatuh ke 481 dari biasanya ~1.430.
+Pada 5-7 Sep 2026 CGK nyaris tidak punya penerbangan berstatus `Landed`/
+`Departed` - hampir semua `Canceled`/`Unknown`. Contoh 7 Sep: dari 100
+kedatangan CGK, **0 Landed, 54 Canceled, 46 Unknown**.
 
-`cek_mutu()` di [`scrape_board.py`](scrape_board.py) menolak menyimpan kalau:
-- ada bandara yang **tidak menghasilkan baris sama sekali**, atau
-- **CGK** < 800 baris, atau realized CGK < 50%.
+**Ini kondisi nyata, bukan kesalahan scrape.** Buktinya:
+- Bandara lain di tanggal yang sama normal (DPS 66% Landed, SUB 47%, SIN 94%)
+- Diperiksa ulang lewat akun **FR24 Gold**: hasilnya sama persis, jadi bukan
+  keterbatasan akses data
+- CGK kembali normal 8 Sep (Landed 229 dari ~370 kedatangan)
 
-CGK dipakai sebagai indikator karena porsinya ~seperempat data dan paling
-stabil (normal: ~1.200 baris, realized 74–82%). Bandara lain tidak dijadikan
-ambang karena wajar-wajar saja rendah — mis. **UPG normal hanya 41–53%**.
+**Untuk pembuatan grafik:** angka domestik 1-7 Sep akan terlihat anjlok
+tajam. Itu memang yang terjadi di lapangan - jangan diperlakukan sebagai
+data rusak lalu dihapus/diinterpolasi. Beri anotasi kalau perlu.
 
-Konsekuensinya: hari yang datanya cacat akan **kosong** (dan memicu retry +
-notifikasi), bukan tersimpan diam-diam. Ini disengaja — hari kosong terlihat
-jelas, sedangkan data cacat merusak deret waktu tanpa ketahuan.
+### Pemeriksaan mutu otomatis (sejak 7 Sep 2026, direvisi 8 Sep)
+
+`cek_mutu()` di [`scrape_board.py`](scrape_board.py) menolak menyimpan HANYA
+kalau ada tanda **kegagalan teknis**:
+- ada bandara yang tidak menghasilkan baris sama sekali, atau
+- CGK < 800 baris (normal ~1.200) - pertanda paginasi terpotong
+
+**Porsi realized TIDAK dipakai sebagai alasan menolak**, hanya jadi
+peringatan di log. Versi pertama cek ini memakai ambang "realized CGK >= 50%"
+dan itu keliru: saat CGK benar-benar lumpuh (5-7 Sep), data asli ikut
+ditolak dan scraper macet 6 run berturut-turut. Jumlah baris adalah sinyal
+teknis; porsi status adalah kondisi lapangan - keduanya tidak boleh disamakan.
 
 ### Tanggal yang hilang (tak bisa dipulihkan — FR24 tak simpan histori)
 
 - Tidak pernah ter-scrape: `260507`–`260510`, `260528`, `260602`, `260624`, `260626`, `260702`, `260713`, `260715`, `260717`
-- Parsial/rusak dan **sudah dihapus** dari repo: `260506`, `260524` (dulu isinya cuma sebagian; dibuang agar tidak jadi data cacat)
+- Parsial/rusak dan **sudah dihapus** dari repo: `260506`, `260524`, `260901`
+  (CGK cuma 602 baris - paginasi terpotong), `260905` (CGK nol baris).
+  Semuanya kegagalan teknis, bukan kondisi lapangan.
+- `260906` sempat dihapus keliru lalu **dipulihkan** - isinya data asli hari
+  CGK terganggu, bukan data cacat.
 
 Jadi tanggal yang ADA di `csv/` & `excel/` semuanya lengkap. Tidak perlu lagi
 menyaring hari gagal saat mengolah — GAGAL-set di skrip olahan boleh dikosongkan.

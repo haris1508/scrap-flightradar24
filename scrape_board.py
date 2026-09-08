@@ -423,14 +423,20 @@ def cek_mutu(all_rows: list) -> list:
             masalah.append(f"{iata}: tidak ada baris sama sekali")
 
     baris, real = per.get("CGK", [0, 0])
-    if baris:
-        if baris < 800:
-            masalah.append(f"CGK: baris hanya {baris} (normal ~1.200)")
-        elif real / baris < 0.50:
-            masalah.append(
-                f"CGK: realized {real}/{baris} = {100*real/baris:.0f}% "
-                f"(normal 74-82%) - status belum final"
-            )
+    if baris and baris < 800:
+        masalah.append(f"CGK: baris hanya {baris} (normal ~1.200)")
+
+    # CATATAN PENTING - jangan jadikan porsi realized sebagai alasan menolak.
+    # Porsi realized rendah BUKAN selalu berarti data cacat: bisa jadi bandara
+    # memang sedang lumpuh. Terbukti 5-7 Sep 2026, CGK nyaris 100% Canceled
+    # sementara DPS/SUB/SIN normal di tanggal sama - dan FR24 melaporkan hal
+    # yang sama lewat akun Gold, jadi itu kenyataan, bukan kerusakan data.
+    # Versi awal cek ini menolaknya dan membuat scraper macet berhari-hari.
+    # Jumlah baris tetap dipakai karena itu murni sinyal kegagalan teknis.
+    if baris and real / baris < 0.50:
+        print(f"  [PERINGATAN] CGK realized {real}/{baris} = {100*real/baris:.0f}% "
+              f"(normal 74-82%). Data TETAP disimpan - bisa jadi gangguan nyata "
+              f"di bandara, bukan kesalahan scrape.")
     return masalah
 
 
