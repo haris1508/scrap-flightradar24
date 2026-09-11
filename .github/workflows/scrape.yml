@@ -129,6 +129,6 @@ jobs:
                 '### Solusi:',
                 '1. Klik link run di atas untuk lihat detail error',
                 '2. Coba trigger manual: **Actions → Run workflow**',
-                '3. Kalau masih gagal, ping @haris1508',
+                '3. Kalau masih gagal, ping @heyhrris',
               ].join('\n'),
             });
